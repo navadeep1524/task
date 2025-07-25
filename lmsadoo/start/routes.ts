@@ -1,17 +1,10 @@
 import router from '@adonisjs/core/services/router'
+import authJwt from '#middleware/auth_jwt'
 
-router.post('/login', 'AuthController')
+router.post('/signup', '#controllers/auth_controller.signup')
+router.post('/login', '#controllers/auth_controller.login')
 
 router.group(() => {
-  router.get('/dashboard', 'StudentsController.dashboard')            
-  router.get('/courses/:id', 'CoursesController.detail')              
-  router.get('/courses/:id/videos', 'CoursesController.videos')       
-  router.get('/courses/:id/exercises', 'CoursesController.exercises') 
-  router.get('/courses/:id/grades', 'StudentsController.grades')      
-  router.get('/courses/:id/assignments', 'AssignmentsController.list')
-  router.post('/assignments/:id/submit', 'SubmissionsController.submit') 
-  router.get('/courses/:id/forums', 'ForumsController.list')         
-  router.post('/courses/:id/forums', 'ForumsController.create')       
-})
-  .prefix('/student')
-  .middleware([() => import('#middleware/JwtAuth')]) 
+  router.get('/dashboard', 'StudentsController.getEnrolledCourses')
+  router.get('/course/:id', 'StudentsController.getCourseDetails')
+}).prefix('/api/student').use(authJwt)

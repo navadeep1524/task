@@ -2,22 +2,33 @@
   <div class="dashboard">
     <h2>My Courses (Instructor)</h2>
     <ul class="course-list">
-      <li v-for="course in courses" :key="course.id" class="course-card">
-        <span class="course-title">{{ course.title }}</span>
-        <router-link :to="`/instructor/course/${course.id}`" class="view-btn">View Course</router-link>
-      </li>
+      <InstructorCourseCard
+        v-for="course in limitedCourses"
+        :key="course.id"
+        :course="course"
+        @edit="editCourse"
+        @delete="deleteCourse"
+      />
     </ul>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import InstructorCourseCard from '../components/InstructorCard.vue'
 
 export default {
   name: 'InstructorDashboard',
+  components: { InstructorCourseCard },
   data() {
     return {
       courses: []
+    }
+  },
+  computed: {
+    
+    limitedCourses() {
+      return this.courses.slice(0, 3)
     }
   },
   mounted() {
@@ -29,7 +40,21 @@ export default {
         const response = await axios.get('/api/instructor/courses')
         this.courses = response.data
       } catch (error) {
-        console.error('Error fetching instructor courses:', error)
+        console.error('Error fetching courses:', error)
+      }
+    },
+    editCourse(course) {
+      
+      this.$router.push(`/instructor/course/${course.id}/edit`)
+    },
+    async deleteCourse(courseId) {
+      if (confirm('Are you sure you want to delete this course?')) {
+        try {
+          await axios.delete(`/api/instructor/course/${courseId}`)
+          this.courses = this.courses.filter(c => c.id !== courseId)
+        } catch (error) {
+          console.error('Error deleting course:', error)
+        }
       }
     }
   }
@@ -57,35 +82,5 @@ h2 {
   flex-direction: column;
   gap: 1.2rem;
   align-items: center;
-}
-
-.course-card {
-  background-color: #e3f2fd;
-  padding: 1rem 1.5rem;
-  border-left: 5px solid #0077cc;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 600px;
-  width: 100%;
-}
-
-.course-title {
-  font-weight: bold;
-  color: #003366;
-}
-
-.view-btn {
-  padding: 0.5rem 1rem;
-  background-color: #0077cc;
-  color: white;
-  border-radius: 4px;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.view-btn:hover {
-  background-color: #005fa3;
 }
 </style>

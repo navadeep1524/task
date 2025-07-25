@@ -1,53 +1,44 @@
-// app/controllers/auth_controller.ts
-
 import type { HttpContext } from '@adonisjs/core/http'
-import Student from '#models/student'
-import Instructor from '#models/instructor'
+import jwt, { Secret } from 'jsonwebtoken'
+import User from '../models/login.js'
 import hash from '@adonisjs/core/services/hash'
-import jwt from 'jsonwebtoken'
 
 export default class AuthController {
-  public async login({ request, response }: HttpContext) {
-    const { email, password, userType } = request.only(['email', 'password', 'userType'])
+  public async signup({ request, response }: HttpContext) {
+    const { name, email, password, role } = request.only(['name', 'email', 'password', 'role'])
 
-    let user = null
-
-    
-    if (userType === 'student') {
-      user = await Student.query().where('email', email).first()
-    } else if (userType === 'instructor') {
-      user = await Instructor.query().where('email', email).first()
-    } else {
-      return response.badRequest({ message: 'Invalid user type' })
+    const exists = await User.query().where('email', email).first()
+    if (exists) {
+      return response.conflict({ message: 'Email already exists' })
     }
 
+    const user = await User.create({ name, email, password, role })
 
+    const secret: Secret = process.env.JWT_SECRET || 'fallback_secret'
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, secret)
+
+    return response.created({
+      token,
+      role: user.role,
+      message: 'Signup successful',
+    })
+  }
+
+  public async login({ request, response }: HttpContext) {
+    const { email, password } = request.only(['email', 'password'])
+
+    const user = await User.query().where('email', email).first()
     if (!user || !(await hash.verify(user.password, password))) {
       return response.unauthorized({ message: 'Invalid email or password' })
     }
 
-
-    const secret = process.env.JWT_SECRET || 'navadeep_secret'
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        userType: userType,
-      },
-      secret,
-      { expiresIn: '1d' }
-    )
-
+    const secret: Secret = process.env.JWT_SECRET || 'fallback_secret'
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, secret)
 
     return response.ok({
       token,
-      userType,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+      role: user.role,
+      message: 'Login successful',
     })
   }
 }

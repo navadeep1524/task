@@ -2,37 +2,39 @@
   <div class="dashboard">
     <h2>My Courses</h2>
     <ul class="course-list">
-      <li v-for="course in courses" :key="course.id" class="course-card">
-        <span class="course-title">{{ course.title }}</span>
-        <router-link :to="`/student/course/${course.id}`" class="view-btn">View Course</router-link>
-      </li>
+      <CourseCard v-for="course in courses" :key="course.id" :course="course" />
     </ul>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import CourseCard from '@/components/CourseCard.vue';
 
 export default {
   name: 'StudentDashboard',
+  components: {
+    CourseCard
+  },
   data() {
     return {
-      courses: [],
+      courses: [
+        { id: 1, title: 'C++ Basics' },
+        { id: 2, title: 'Java Object-Oriented Programming' },
+        { id: 3, title: 'Python for Data Science' },
+      ],
     };
   },
-  mounted() {
-    this.fetchCourses();
-  },
-  methods: {
-    async fetchCourses() {
-      try {
-        const res = await axios.get('/api/student/courses');
+  async mounted() {
+    try {
+      const res = await axios.get('/api/student/courses');
+      if (res.data && Array.isArray(res.data) && res.data.length) {
         this.courses = res.data;
-      } catch (error) {
-        console.error('Error fetching courses:', error);
       }
-    },
-  },
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  }
 };
 </script>
 
@@ -58,38 +60,5 @@ h2 {
   flex-direction: column;
   gap: 1.2rem;
   align-items: center;
-}
-
-.course-card {
-  background-color: #e3f2fd;
-  padding: 1rem 1.5rem;
-  border-left: 5px solid #2196f3;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 600px;
-  width: 100%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.course-title {
-  font-weight: 600;
-  color: #0d47a1;
-  font-size: 1.1rem;
-}
-
-.view-btn {
-  padding: 0.5rem 1rem;
-  background-color: #2196f3;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.view-btn:hover {
-  background-color: #1976d2;
 }
 </style>
