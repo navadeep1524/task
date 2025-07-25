@@ -2,7 +2,8 @@
   <div>
     <header v-if="!hideNavRoutes.includes(currentRoute.path)">
       <nav>
-        
+        <RouterLink to="/student">Student</RouterLink>
+        <RouterLink to="/instructor">Instructor</RouterLink>
       </nav>
     </header>
 

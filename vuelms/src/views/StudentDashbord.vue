@@ -17,34 +17,21 @@ export default {
   name: 'StudentDashboard',
   data() {
     return {
-      
-      courses: [
-        { id: 1, title: 'C++ Basics' },
-        { id: 2, title: 'Java Object-Oriented Programming' },
-        { id: 3, title: 'Python for Data Science' },
-        { id: 4, title: 'JavaScript basics' },
-        { id: 5, title: 'HTML basics' },
-        {id: 6, title:'CSS basics'},
-        {id: 7, title: 'Full-Stack Web Development (HTML, CSS, JS)'},
-        {id: 8, title:'Frontend Frameworks with React & Vue'},
-        {id: 9, title:'Backend Development with Node.js'},
-        {id: 10, title:'Database Management: MySQL'},
-        {id: 11, title:'Version Control with Git & GitHub'},
-        {id: 12, title:'RESTful API Design & Postman Testing'},
-        {id: 13, title:'DevOps Basics: Docker, CI/CD'}
-      ],
+      courses: [],
     };
   },
-  async mounted() {
-    try {
-      const res = await axios.get('/api/student/courses');
-      if (res.data && Array.isArray(res.data) && res.data.length) {
+  mounted() {
+    this.fetchCourses();
+  },
+  methods: {
+    async fetchCourses() {
+      try {
+        const res = await axios.get('/api/student/courses');
         this.courses = res.data;
+      } catch (error) {
+        console.error('Error fetching courses:', error);
       }
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      
-    }
+    },
   },
 };
 </script>
