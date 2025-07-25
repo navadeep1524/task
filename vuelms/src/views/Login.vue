@@ -4,6 +4,14 @@
     <form @submit.prevent="handleLogin">
       <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="password" type="password" placeholder="Password" required />
+
+      
+      <select v-model="role" required>
+        <option disabled value="">Select Role</option>
+        <option value="student">Student</option>
+        <option value="instructor">Instructor</option>
+      </select>
+
       <button type="submit">Login</button>
     </form>
   </div>
@@ -18,6 +26,7 @@ export default {
     return {
       email: '',
       password: '',
+      role: '', 
     };
   },
   methods: {
@@ -26,6 +35,7 @@ export default {
         const res = await axios.post('/api/login', {
           email: this.email,
           password: this.password,
+          role: this.role, 
         });
 
         const user = res.data;
@@ -33,7 +43,7 @@ export default {
         if (user.role === 'student') {
           this.$router.push('/student/dashboard');
         } else if (user.role === 'instructor') {
-          this.$router.push('/instructor/dashboard'); 
+          this.$router.push('/instructor/dashboard');
         } else {
           alert('Invalid role');
         }
@@ -69,7 +79,8 @@ form {
   flex-direction: column;
 }
 
-input {
+input,
+select {
   padding: 0.8rem;
   margin-bottom: 1rem;
   border: 1px solid #ccc;
@@ -84,7 +95,6 @@ button {
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 button:hover {
